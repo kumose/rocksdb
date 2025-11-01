@@ -154,10 +154,7 @@ else()
   endif()
 
   if(WITH_SNAPPY)
-    find_package(Snappy CONFIG)
-    if(NOT Snappy_FOUND)
-      find_package(Snappy REQUIRED)
-    endif()
+    find_package(Snappy CONFIG REQUIRED)
     add_definitions(-DSNAPPY)
     list(APPEND THIRDPARTY_LIBS Snappy::snappy)
   endif()
@@ -187,10 +184,9 @@ else()
   endif()
 
   if(WITH_ZSTD)
-    find_package(zstd REQUIRED)
+    find_package(zstd CONFIG REQUIRED)
     add_definitions(-DZSTD)
-    include_directories(${ZSTD_INCLUDE_DIRS})
-    list(APPEND THIRDPARTY_LIBS zstd::zstd)
+    list(APPEND THIRDPARTY_LIBS zstd::libzstd_static) 
   endif()
 endif()
 
@@ -331,11 +327,10 @@ int main() {
 endif()
 
 if (WITH_LIBURING)
-  find_package(uring)
-  if (uring_FOUND)
-    add_definitions(-DROCKSDB_IOURING_PRESENT)
-    list(APPEND THIRDPARTY_LIBS uring::uring)
-  endif()
+  find_package(PkgConfig)
+  pkg_check_modules(liburing REQUIRED IMPORTED_TARGET GLOBAL liburing>=2.0)
+  add_definitions(-DROCKSDB_IOURING_PRESENT)
+  list(APPEND THIRDPARTY_LIBS PkgConfig::liburing)
 endif()
 
 # Reset the required flags
@@ -401,9 +396,9 @@ endif()
 
 option(WITH_TBB "build with Threading Building Blocks (TBB)" OFF)
 if(WITH_TBB)
-  find_package(TBB REQUIRED)
+  find_package(TBB CONFIG REQUIRED)
   add_definitions(-DTBB)
-  list(APPEND THIRDPARTY_LIBS TBB::TBB)
+  list(APPEND THIRDPARTY_LIBS TBB::tbb)
 endif()
 
 # Stall notifications eat some performance from inserts
@@ -1235,8 +1230,6 @@ if(NOT WIN32 OR ROCKSDB_INSTALL_ON_WINDOWS)
       install(FILES plugin/${plugin}/${header} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rocksdb/plugin/${plugin})
     endforeach()
   endforeach()
-
-  install(DIRECTORY "${PROJECT_SOURCE_DIR}/cmake/modules" COMPONENT devel DESTINATION ${package_config_destination})
 
   install(
     TARGETS ${ROCKSDB_STATIC_LIB}

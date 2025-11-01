@@ -33,11 +33,11 @@ if(@WITH_BZ2@)
 endif()
 
 if(@WITH_LZ4@)
-  find_dependency(lz4)
+  find_dependency(lz4 CONFIG)
 endif()
 
 if(@WITH_ZSTD@)
-  find_dependency(zstd)
+  find_dependency(zstd CONFIG)
 endif()
 
 if(@WITH_NUMA@)
@@ -45,7 +45,12 @@ if(@WITH_NUMA@)
 endif()
 
 if(@WITH_TBB@)
-  find_dependency(TBB)
+  find_dependency(TBB CONFIG)
+endif()
+
+if(@WITH_LIBURING@)
+  find_dependency(PkgConfig)
+  pkg_check_modules(liburing REQUIRED IMPORTED_TARGET GLOBAL liburing>=2.0)
 endif()
 
 find_dependency(Threads)
